@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{layout/layout}">
+<head>
+  <meta charset="UTF-8">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <title>Title</title>
+</head>
+<body>
+<div layout:fragment="layout">
+<h3>Update</h3>
+<form th:action="@{/department/edit}" method="post">
+  <p th:if="${message !=null}" th:text="${message}" style="color: chartreuse"></p>
+  <input th:value="${department.id}" name="id" type="hidden"><br>
+  <label>Name:</label>
+  <input type="text" name="name" th:value="${department.name}" placeholder="name"><br>
+  <label>Description</label>
+  <input type="text" th:value="${department.description}" name="description" placeholder="Description"><br>
+  <button type="submit">Upload</button>
+</form>
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</html>
