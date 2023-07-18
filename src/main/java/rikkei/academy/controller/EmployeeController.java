@@ -3,6 +3,7 @@ package rikkei.academy.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import rikkei.academy.model.Employee;
@@ -10,10 +11,13 @@ import rikkei.academy.repository.EmployeeRepository;
 import rikkei.academy.repository.RoleRepository;
 import rikkei.academy.service.DepartmentService;
 import rikkei.academy.service.EmployeeService;
+import rikkei.academy.service.RoleService;
 import rikkei.academy.service.dto.DepartmentDTO;
 import rikkei.academy.service.dto.EmployeeDTO;
 
+import javax.validation.Valid;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -23,13 +27,13 @@ public class EmployeeController {
     private final EmployeeService employeeService;
     private final EmployeeRepository employeeRepository;
     private final DepartmentService departmentService;
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
-    public EmployeeController(EmployeeService employeeService, EmployeeRepository employeeRepository, DepartmentService departmentService, RoleRepository roleRepository) {
+    public EmployeeController(EmployeeService employeeService, EmployeeRepository employeeRepository, DepartmentService departmentService, RoleService roleService) {
         this.employeeService = employeeService;
         this.employeeRepository = employeeRepository;
         this.departmentService = departmentService;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     @GetMapping("/index")
@@ -41,34 +45,34 @@ public class EmployeeController {
     }
 
     @GetMapping("/add")
-    public ModelAndView showAdd(Pageable pageable) {
+    public ModelAndView showAdd() {
         ModelAndView modelAndView = new ModelAndView("employee/add");
-        Page<DepartmentDTO> listDepart = departmentService.findAll(pageable);
-        modelAndView.addObject("role", roleRepository.findAll());
-        modelAndView.addObject("listDepartment", listDepart);
+        modelAndView.addObject("role", roleService.findAll());
+        modelAndView.addObject("departments", departmentService.findAll());
+        modelAndView.addObject("employee",new EmployeeDTO());
         return modelAndView;
     }
 
     @PostMapping("/add")
-    public ModelAndView doAdd(@RequestParam("name") String name,
-                              @RequestParam("email") String email,
-                              @RequestParam("depart") Long departmentId,
-                              @RequestParam("role") String roleId) {
-        ModelAndView modelAndView = new ModelAndView("employee/add");
-        EmployeeDTO newEmployee = new EmployeeDTO();
-        if (employeeRepository.findOneByEmailIgnoreCase(email).isPresent()) {
-            return modelAndView.addObject("message", "Email is already in use!");
+    public ModelAndView doAdd(@Valid @ModelAttribute("employee") EmployeeDTO employeeDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            ModelAndView modelAndView = new ModelAndView("employee/add", bindingResult.getModel());
+            modelAndView.addObject("employee", employeeDTO);
+            modelAndView.addObject("departments", departmentService.findAll());
+            modelAndView.addObject("roles", roleService.findAll());
+            return modelAndView;
         }
-        newEmployee.setName(name);
-        newEmployee.setEmail(email);
-        newEmployee.setDepartmentId(departmentId);
-        Set<String> role = new HashSet<>();
-        role.add(roleId);
-        newEmployee.setRoles(role);
-        employeeService.save(newEmployee);
-        modelAndView.addObject("message", "Create Success!!!");
-        return modelAndView;
+        ModelAndView modelAndView = new ModelAndView("employee/add");
+        modelAndView.addObject("departments", departmentService.findAll());
+        modelAndView.addObject("roles", roleService.findAll());
+        if (employeeRepository.findOneByEmailIgnoreCase(employeeDTO.getEmail()).isPresent()) {
+            return modelAndView.addObject("message1", "Email is already in use!");
+        }
+        employeeService.save(employeeDTO);
+        modelAndView.addObject("message1", "Create Success!!!");
+        return new ModelAndView("redirect:/employee/index");
     }
+
 
     @GetMapping("/edit/{id}")
     public ModelAndView showEdit(@PathVariable("id") Long id, Pageable pageable) {
@@ -85,7 +89,7 @@ public class EmployeeController {
     }
 
     @PostMapping("/edit")
-    public ModelAndView doEdit(@ModelAttribute("employeeUpload") EmployeeDTO employeeDTO) {
+    public ModelAndView doEdit(@ModelAttribute("employeeUpdate") EmployeeDTO employeeDTO) {
         ModelAndView modelAndView = new ModelAndView("employee/edit");
         if (!employeeRepository.existsById(employeeDTO.getId())) {
             return modelAndView.addObject("message1", "Entity not found");

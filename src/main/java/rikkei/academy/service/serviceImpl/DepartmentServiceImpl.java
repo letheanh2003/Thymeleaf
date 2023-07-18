@@ -9,6 +9,7 @@ import rikkei.academy.service.DepartmentService;
 import rikkei.academy.service.dto.DepartmentDTO;
 import rikkei.academy.service.mapper.DepartmentMapper;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -42,5 +43,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public void delete(Long id) {
         departmentRepository.deleteById(id);
+    }
+
+    @Override
+    public List<DepartmentDTO> findAll() {
+        return departmentMapper.toDto(departmentRepository.findAll());
     }
 }

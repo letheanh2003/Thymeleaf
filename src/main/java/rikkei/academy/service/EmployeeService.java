@@ -14,4 +14,6 @@ public interface EmployeeService {
     Optional<EmployeeDTO> findOne(Long id);
 
     void delete(Long id);
+
+    boolean existsByEmail(String email);
 }

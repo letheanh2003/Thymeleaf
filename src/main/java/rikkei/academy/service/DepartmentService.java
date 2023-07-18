@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import rikkei.academy.service.dto.DepartmentDTO;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface DepartmentService {
@@ -14,5 +15,6 @@ public interface DepartmentService {
     Optional<DepartmentDTO> findOne(Long id);
 
     void delete(Long id);
+    List<DepartmentDTO> findAll();
 }
 

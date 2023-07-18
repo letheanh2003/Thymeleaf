@@ -32,15 +32,11 @@ public class DepartmentController {
     }
 
     @PostMapping("/add")
-    public ModelAndView doAdd(@RequestParam("name") String name,
-                              @RequestParam("description") String description) {
-        DepartmentDTO departmentDTO = new DepartmentDTO();
-        departmentDTO.setName(name);
-        departmentDTO.setDescription(description);
-        departmentService.save(departmentDTO);
+    public ModelAndView doAdd(@ModelAttribute("department") DepartmentDTO department) {
+        departmentService.save(department);
         ModelAndView modelAndView = new ModelAndView("department/add");
         modelAndView.addObject("message", "Create success!!");
-        return modelAndView;
+        return new ModelAndView("redirect:/department/index");
     }
 
     @GetMapping("/add")
@@ -72,19 +68,12 @@ public class DepartmentController {
     }
 
     @PostMapping("/edit")
-    public ModelAndView doEdit(@RequestParam("id") Long id,
-                               @RequestParam("name") String name,
-                               @RequestParam("description") String description, Pageable pageable) {
-        ModelAndView modelAndView = new ModelAndView("department/index");
-        DepartmentDTO departmentDTO = new DepartmentDTO();
-        departmentDTO.setName(name);
-        departmentDTO.setId(id);
-        departmentDTO.setDescription(description);
+    public ModelAndView doEdit(@ModelAttribute("department") DepartmentDTO departmentDTO) {
         departmentService.save(departmentDTO);
-        Page<DepartmentDTO> listDepartment = departmentService.findAll(pageable);
-        modelAndView.addObject("listDepartment", listDepartment);
+        ModelAndView modelAndView = new ModelAndView("redirect:/department/index");
         return modelAndView;
     }
+
     @GetMapping("/detail/{id}")
     public ModelAndView showDetail(@PathVariable("id") Long id) {
         ModelAndView modelAndView = new ModelAndView("department/detail");
